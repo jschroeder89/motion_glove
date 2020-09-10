@@ -160,7 +160,6 @@ void BMI160::initialize_power_mode(uint8_t *data)
 void BMI160::initialize_I2C()
 {
     uint8_t data[2] = {0};
-    //Wire.begin(SDA, SCL, 1000000);
     initialize_power_mode(data);
     initialize_acc(data);
     initialize_gyro(data);
@@ -227,12 +226,11 @@ void BMI160::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
 
 void BMI160::get_sensor_data()
 {
-    //String header = "BMI160_0x" + String(SLAVE_ADDR, HEX);
     uint8_t data[6] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BMI160_ARRAY = doc.to<JsonArray>();
+    BMI160_ARRAY.add("BMI160");
     JsonArray BMI160_DATA = doc.createNestedArray();
-    BMI160_ARRAY.add(SLAVE_ADDR);
     get_gyro_data(data, BMI160_DATA);
     get_acc_data(data, BMI160_DATA);
     publish_sensor_data(doc);

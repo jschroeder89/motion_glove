@@ -126,9 +126,10 @@ void loop() {
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 	delay(500);
 	I2C_MUX.select_bus(I2C_BUS_0);
-	HB_UNIT.get_sensor_data(OPR_MODE_AMG, NONE);
-	I2C_MUX.select_bus(5);
-	finger_mid.get_sensor_data();
+	//HB_UNIT.get_sensor_data(OPR_MODE_AMG, NONE);
+	HB_UNIT.get_sensor_data(OPR_MODE_IMU, EULE);
+	//I2C_MUX.select_bus(5);
+	//finger_mid.get_sensor_data();
 
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);

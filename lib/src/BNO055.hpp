@@ -130,9 +130,10 @@
 #define UNIT_SEL_ACC_M_S2       UINT8_C(0x00)
 #define UNIT_SEL_ACC_MG         UINT8_C(0x01)
 #define UNIT_SEL_ANG_RATE_DEG   UINT8_C(0x00)
-#define UNIT_SEL_ANG_RATE_RAD   UINT8_C(0x04)
-
-#define EULE                  true   
+#define UNIT_SEL_ANG_RATE_RAD   UINT8_C(0x02)
+#define UNIT_SEL_EU_ANG_DEG     UINT8_C(0x00)
+#define UNIT_SEL_EU_ANG_RAD     UINT8_C(0x04)
+#define EULE                    true   
 #define QUAT                    false
 #define NONE                    false
 
@@ -148,6 +149,7 @@ public:
     void initialize_BNO055(uint8_t *data, uint8_t opr);
     void check_power_mode(uint8_t *data);
     void initialize_operating_mode(uint8_t opr_mode); 
+    void select_unit(uint8_t unit);
     void get_sensor_data(uint8_t opr, bool format);
     void data_mode_amg();
     void data_mode_fusion_absolute_euler();
@@ -157,6 +159,8 @@ public:
     void get_acc_data(uint8_t *data, JsonArray& array);
     void get_mag_data(uint8_t *data, JsonArray& array);
     void get_gyro_data(uint8_t *data, JsonArray& array);
+    void get_euler_hrp(uint8_t *data, JsonArray& array);
+    void get_quant(uint8_t *data, JsonArray &array);
     size_t publish_sensor_data(JsonDocument& doc);
     void read_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void write_reg(uint8_t *data, uint8_t addr, uint8_t len);

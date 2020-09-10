@@ -38,6 +38,10 @@ void BNO055::initialize_operating_mode(uint8_t opr_mode)
     return;
 }
 
+void BNO055::select_unit(uint8_t unit) {
+    write_reg(&unit, UNIT_SEL, 1);
+}
+
 void BNO055::write_reg(uint8_t *data, uint8_t addr, uint8_t len)
 {
     Wire.beginTransmission(SLAVE_ADDR);
@@ -150,15 +154,12 @@ void BNO055::get_acc_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], ACC_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
@@ -171,15 +172,12 @@ void BNO055::get_mag_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], MAG_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
@@ -192,33 +190,67 @@ void BNO055::get_gyro_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], GYR_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
-size_t BNO055::publish_sensor_data(JsonDocument& doc)
-{
-    //size_t num_bytes = serializeMsgPack(doc, Serial);
-    size_t num_bytes = serializeJson(doc, Serial);
-    Serial.println("");
-    return num_bytes;
+void BNO055::get_euler_hrp(uint8_t *data, JsonArray &array) {
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], EUL_HEADING_LS, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    return;
 }
 
-void BNO055::data_mode_fusion_absolute_euler() {
+void BNO055::get_quant(uint8_t *data, JsonArray &array) {
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], QUA_DATA_W_LSB, 8);
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    return;
+}
+
+void BNO055::data_mode_fusion_absolute_euler()
+{
 
 }
 
 void BNO055::data_mode_fusion_relative_euler() {
-
+    uint8_t data[6] = {0};
+    DynamicJsonDocument doc(256);
+    JsonArray BNO055_ARRAY = doc.to<JsonArray>();
+    BNO055_ARRAY.add("BNO055_0x28");
+    JsonArray BNO055_DATA = doc.createNestedArray();
+    select_unit(UNIT_SEL_EU_ANG_DEG);
+    get_euler_hrp(data, BNO055_DATA);
+    publish_sensor_data(doc);
 }
 
 void BNO055::data_mode_fusion_absolute_quaternion() {
@@ -227,4 +259,12 @@ void BNO055::data_mode_fusion_absolute_quaternion() {
 
 void BNO055::data_mode_fusion_relative_quaternion() { 
 
+}
+
+size_t BNO055::publish_sensor_data(JsonDocument& doc)
+{
+    //size_t num_bytes = serializeMsgPack(doc, Serial);
+    size_t num_bytes = serializeJson(doc, Serial);
+    Serial.println("");
+    return num_bytes;
 }
