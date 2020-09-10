@@ -1,5 +1,6 @@
 #include "BNO055.hpp"
 #include "Wire.h"
+#include <string.h>
 
 BNO055::BNO055(uint8_t addr):SLAVE_ADDR(addr){}
 
@@ -9,7 +10,6 @@ void BNO055::initialize_I2C(uint8_t opr)
 {   
     uint8_t data[2] = {0};
     initialize_BNO055(data, opr);
-    
     return;
 }
 
@@ -62,8 +62,8 @@ void BNO055::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
     {
         data[i] = Wire.read();
         //delay(1);
-        /*
-        if (data[i] < 0x10)
+        
+        /* if (data[i] < 0x10)
         {
             Serial.print("Data: 0x0");
         }
@@ -77,7 +77,7 @@ void BNO055::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
         else
             Serial.print(" @Adress: 0x");
         Serial.print(addr++, HEX);
-        Serial.println();*/
+        Serial.println(); */
     }
     return;
 }
@@ -87,11 +87,13 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
     switch (opr)
     {
     case OPR_MODE_AMG:
-        data_mode_amg();
-        break;
+        if (format == NONE)
+        {
+            data_mode_amg();
+        } break;
 
     case OPR_MODE_IMU:
-        if (format == EULER)
+        if (format == EULE)
         {
             data_mode_fusion_relative_euler();
         } else if (format == QUAT) {
@@ -99,7 +101,7 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
         } break;
     
     case OPR_MODE_M4G:
-        if (format == EULER)
+        if (format == EULE)
         {
             data_mode_fusion_relative_euler();
         } else if (format == QUAT) {
@@ -107,7 +109,7 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
         } break;    
 
     case OPR_MODE_NDOF:
-        if (format == EULER)
+        if (format == EULE)
         {
             data_mode_fusion_relative_euler();
         } else if (format == QUAT) {
@@ -115,7 +117,7 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
         } break;
 
     case OPR_MODE_NDOF_FMC_OFF:
-        if (format == EULER)
+        if (format == EULE)
         {
             data_mode_fusion_relative_euler();
         } else if (format == QUAT) {
@@ -129,31 +131,100 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
 
 void BNO055::data_mode_amg()
 {
-    // String header = "BNO055_0x";
-    // String addr_str = String(SLAVE_ADDR, HEX);
-    String header = "BNO055_0x" + String(SLAVE_ADDR, HEX);
     uint8_t data[9] = {0};
-    DynamicJsonDocument doc(128);
-    JsonArray BNO055_ARRAY = doc.createNestedArray(header);
-    get_acc_data(data,BNO055_ARRAY);
-    get_mag_data(data, BNO055_ARRAY);
-    get_gyro_data(data, BNO055_ARRAY);
+    DynamicJsonDocument doc(256);
+    JsonArray BNO055_ARRAY = doc.to<JsonArray>();
+    BNO055_ARRAY.add("BNO055_0x28");
+    JsonArray BNO055_DATA = doc.createNestedArray();
+    get_acc_data(data, BNO055_DATA);
+    get_mag_data(data, BNO055_DATA);
+    get_gyro_data(data, BNO055_DATA);
     publish_sensor_data(doc);
 }
 
 void BNO055::get_acc_data(uint8_t *data, JsonArray& array)
 {
-
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], ACC_DATA_X_LSB, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    return;
 }
 
 void BNO055::get_mag_data(uint8_t *data, JsonArray& array)
 {
-
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], MAG_DATA_X_LSB, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    return;
 }
 
 void BNO055::get_gyro_data(uint8_t *data, JsonArray& array)
 {
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], GYR_DATA_X_LSB, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
+    return;
+}
+
+size_t BNO055::publish_sensor_data(JsonDocument& doc)
+{
+    //size_t num_bytes = serializeMsgPack(doc, Serial);
+    size_t num_bytes = serializeJson(doc, Serial);
+    Serial.println("");
+    return num_bytes;
+}
+
+void BNO055::data_mode_fusion_absolute_euler() {
 
 }
 
-//void BNO055::data_mode_fusion_absolute_euler
+void BNO055::data_mode_fusion_relative_euler() {
+
+}
+
+void BNO055::data_mode_fusion_absolute_quaternion() {
+
+}
+
+void BNO055::data_mode_fusion_relative_quaternion() { 
+
+}

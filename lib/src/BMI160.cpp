@@ -1,5 +1,6 @@
 #include "BMI160.hpp"
 #include <Wire.h>
+#include <string.h>
 
 BMI160::BMI160(uint8_t addr):SLAVE_ADDR(addr){}
 BMI160::~BMI160(){}
@@ -226,14 +227,14 @@ void BMI160::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
 
 void BMI160::get_sensor_data()
 {
-    String header = "BMI160_0x";
-    String addr_str = String(SLAVE_ADDR, HEX);
-    header += addr_str; 
+    //String header = "BMI160_0x" + String(SLAVE_ADDR, HEX);
     uint8_t data[6] = {0};
-    DynamicJsonDocument doc(128);
-    JsonArray BMI160_ARRAY = doc.createNestedArray(header);
-    get_gyro_data(data, BMI160_ARRAY);
-    get_acc_data(data, BMI160_ARRAY);
+    DynamicJsonDocument doc(256);
+    JsonArray BMI160_ARRAY = doc.to<JsonArray>();
+    JsonArray BMI160_DATA = doc.createNestedArray();
+    BMI160_ARRAY.add(SLAVE_ADDR);
+    get_gyro_data(data, BMI160_DATA);
+    get_acc_data(data, BMI160_DATA);
     publish_sensor_data(doc);
     return;
 }
