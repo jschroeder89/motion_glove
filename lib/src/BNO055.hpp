@@ -142,6 +142,17 @@ class BNO055
 {
 private:
     uint8_t SLAVE_ADDR; //BNO055 is using the I2C address 0x28
+    uint8_t ACC_X_OFFSET;
+    uint8_t ACC_Y_OFFSET;
+    uint8_t ACC_Z_OFFSET;
+    uint8_t GYRO_X_OFFSET;
+    uint8_t GYRO_Y_OFFSET;
+    uint8_t GYRO_Z_OFFSET;
+    uint8_t MAG_X_OFFSET;
+    uint8_t MAG_Y_OFFSET;
+    uint8_t MAG_Z_OFFSET;
+    
+    
 public:
     BNO055(uint8_t addr);
     ~BNO055();
@@ -151,6 +162,8 @@ public:
     void initialize_operating_mode(uint8_t opr_mode); 
     void select_unit(uint8_t unit);
     void get_sensor_data(uint8_t opr, bool format);
+    void get_sensor_offset();
+    void get_acc_offset(uint8_t *data);
     void data_mode_amg();
     void data_mode_fusion_absolute_euler();
     void data_mode_fusion_absolute_quaternion();

@@ -140,10 +140,36 @@ void BNO055::data_mode_amg()
     JsonArray BNO055_ARRAY = doc.to<JsonArray>();
     BNO055_ARRAY.add("BNO055_0x28");
     JsonArray BNO055_DATA = doc.createNestedArray();
+    select_unit(UNIT_SEL_ACC_MG);
     get_acc_data(data, BNO055_DATA);
     get_mag_data(data, BNO055_DATA);
     get_gyro_data(data, BNO055_DATA);
     publish_sensor_data(doc);
+}
+
+void BNO055::get_sensor_offset() {
+    uint8_t data[18] = {0};
+    get_acc_offset(&data[0]);
+    Serial.print("ACC_Z_OFFSET: ");
+    Serial.print(ACC_Z_OFFSET);
+    Serial.println("");
+}    
+
+void BNO055::get_acc_offset(uint8_t *data) {
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], ACC_OFFSET_X_LSB, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    ACC_X_OFFSET = (((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    ACC_Y_OFFSET = (((uint16_t)((msb << 8) | lsb)));
+    lsb = data[id++];
+    msb = data[id++];
+    ACC_Z_OFFSET = (((uint16_t)((msb << 8) | lsb)));
+    return;
 }
 
 void BNO055::get_acc_data(uint8_t *data, JsonArray& array)
@@ -263,7 +289,6 @@ void BNO055::data_mode_fusion_relative_quaternion() {
 
 size_t BNO055::publish_sensor_data(JsonDocument& doc)
 {
-    //size_t num_bytes = serializeMsgPack(doc, Serial);
     size_t num_bytes = serializeJson(doc, Serial);
     Serial.println("");
     return num_bytes;

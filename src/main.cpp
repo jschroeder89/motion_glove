@@ -77,11 +77,14 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
 
 void setup() {
-	delay(5000);
+	delay(3000);
+	
+	delay(3000);
 	Serial.begin(115200);
 	pinMode(LED_BUILTIN, OUTPUT);
 	Wire.begin(SDA, SCL, 400000);
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
+	//HB_UNIT.initialize_I2C(OPR_MODE_IMU);
 	HB_UNIT.initialize_I2C(OPR_MODE_AMG);
 	finger_mid.initialize_I2C();
 	// finger_end.initialize_I2C();
@@ -124,12 +127,14 @@ void setup() {
 
 void loop() {
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-	delay(500);
+	delay(100);
+	I2C_MUX.select_bus(5);
+	finger_mid.get_sensor_data();
+	delay(0.1);
 	I2C_MUX.select_bus(I2C_BUS_0);
 	//HB_UNIT.get_sensor_data(OPR_MODE_AMG, NONE);
-	HB_UNIT.get_sensor_data(OPR_MODE_IMU, EULE);
-	//I2C_MUX.select_bus(5);
-	//finger_mid.get_sensor_data();
+	HB_UNIT.get_sensor_offset();
+	//HB_UNIT.get_sensor_data(OPR_MODE_IMU, EULE);
 
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
