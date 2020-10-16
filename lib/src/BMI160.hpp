@@ -74,8 +74,8 @@
 
 /* ####### INTERRUPT REGISTERS & MASKS ####### */
 #define INT_STATUS_0_REG            UINT8_C(0x1C)
-#define INT_S_TAP                   UINT8_C(0x10)
-#define INT_D_TAP                   UINT8_C(0x20)
+#define INT_S_TAP                   UINT8_C(0x20)
+#define INT_D_TAP                   UINT8_C(0x10)
 #define INT_EN_0_REG                UINT8_C(0x50)
 #define S_D_TAP_ENABLE_BYTE         UINT8_C(0xFF)
 #define INT1_OUTPUT_EN              UINT8_C(0x04)
@@ -83,11 +83,11 @@
 #define INT_MAP_0_REG               UINT8_C(0x55)
 #define INT_TAP_0_REG               UINT8_C(0x63)
 #define INT_TAP_1_REG               UINT8_C(0x64)
-#define INT_TAP_0_CONF_BYTE         UINT8_C(0x86)
-#define INT_TAP_1_CONF_BYTE         UINT8_C(0x01)
+#define INT_TAP_0_CONF_BYTE         UINT8_C(0x01)
+#define INT_TAP_1_CONF_BYTE         UINT8_C(0x06)
 #define INT_0_DISABLE_BYTE          UINT8_C(0x00)
 #define INT_0_ENABLE_BYTE           UINT8_C(0x04)
-#define LATCH_INT                   UINT8_C(0x1F)
+#define LATCH_INT                   UINT8_C(0x1E)
 #define UNLATCH_INT                 UINT8_C(0x10)
 #define INT_LATCH_REG               UINT8_C(0x54)
 

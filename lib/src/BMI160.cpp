@@ -7,8 +7,7 @@ BMI160::~BMI160(){}
 
 void BMI160::check_acc_range_conf(uint8_t *data) {
     uint8_t acc_range_val = (data[1] & ~ACC_RANGE_MASK);
-    if (acc_range_val < 0x03)
-    {
+    if (acc_range_val < 0x03) {
         acc_range_val = ACC_RANGE_2G;
         write_reg(&acc_range_val, ACC_RANGE_REG, 1);
     }
@@ -19,8 +18,7 @@ void BMI160::check_acc_range_conf(uint8_t *data) {
 void BMI160::check_acc_us_conf(uint8_t *data)
 {
     uint8_t acc_conf_val = (data[0] & ~ACC_US_MASK);
-    if (acc_conf_val == ACC_US_ENABLED)
-    {
+    if (acc_conf_val == ACC_US_ENABLED) {
         acc_conf_val = ACC_US_DISABLED;
         write_reg(&acc_conf_val, ACC_CONF_REG, 1);
     }
@@ -31,8 +29,7 @@ void BMI160::check_acc_us_conf(uint8_t *data)
 void BMI160::check_acc_bw_conf(uint8_t *data)
 {
     uint8_t acc_conf_val = (data[0] & ~ACC_BW_MASK);
-    if ((acc_conf_val == ACC_BW_NORMAL_MODE) || (acc_conf_val == ACC_BW_OSR2_MODE))
-    {
+    if ((acc_conf_val == ACC_BW_NORMAL_MODE) || (acc_conf_val == ACC_BW_OSR2_MODE)) {
         acc_conf_val = ACC_BW_OSR4_MODE;
         write_reg(&acc_conf_val, ACC_CONF_REG, 1);
     }
@@ -43,8 +40,7 @@ void BMI160::check_acc_bw_conf(uint8_t *data)
 void BMI160::check_acc_odr_conf(uint8_t *data)
 {
     uint8_t acc_conf_val = (data[0] & ~ACC_ODR_MASK);
-    if (acc_conf_val < ACC_ODR_1600HZ)
-    {
+    if (acc_conf_val < ACC_ODR_1600HZ){
         acc_conf_val = ACC_ODR_1600HZ;
         write_reg(&acc_conf_val, ACC_CONF_REG, 1);
     }
@@ -200,10 +196,11 @@ void BMI160::initialize_interrupt_engines()
 void BMI160::interrupt_detection_index() {
     uint8_t data[1] = {0};
     read_reg(&data[0], INT_STATUS_0_REG, 1);
-    Serial.println(data[0], HEX);
-    /* while (data[0] == 0) {
+    //Serial.println(data[0], HEX);
+    while (data[0] == 0) {
         read_reg(&data[0], INT_STATUS_0_REG, 1);
-    } */
+        //if (data[0] != 0) Serial.println(data[0], HEX);
+    } 
     //data[0] = UNLATCH_INT;
     //write_reg(&data[0], INT_LATCH_REG, 1);
     DynamicJsonDocument doc(32);

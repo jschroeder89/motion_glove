@@ -144,10 +144,10 @@ void setup() {
 
 void loop() {
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-	delay(100);
 	I2C_MUX.select_bus(_INDEX_);
 	INDEX.get_sensor_data();
-	delay(0.1);
+	delay(25);
+	//delay(0.1);
 	if (IndexInterruptTriggerd == true) {
 		INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
