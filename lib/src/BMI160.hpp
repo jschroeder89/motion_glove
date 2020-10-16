@@ -24,7 +24,7 @@
 #define ACC_Y                       UINT8_C(4)
 #define ACC_Z                       UINT8_C(5)
 
-/*####### ACC CONF #######*/        
+/* ####### ACC CONF ####### */        
 #define ACC_CONF_REG                UINT8_C(0x40)
 #define ACC_ODR_25HZ                UINT8_C(0x06)
 #define ACC_ODR_50HZ                UINT8_C(0x07)
@@ -49,7 +49,7 @@
 #define ACC_RANGE_MASK              UINT8_C(0xF0)
 #define ACC_PMU_STATUS_MASK         UINT8_C(0xCF)
 
-/*####### GYRO CONF #######*/
+/* ####### GYRO CONF ####### */
 #define GYRO_CONF_REG               UINT8_C(0x42)
 #define GYRO_ODR_MASK               UINT8_C(0xF0)
 #define GYRO_ODR_3200HZ             UINT8_C(0x0D)
@@ -72,13 +72,31 @@
 #define GYRO_PWR_NORMAL_MODE        UINT8_C(0x15)
 #define GYRO_PMU_STATUS_MASK        UINT8_C(0xF3)
 
-/*####### BMI160 REGISTERS & MASKS #######*/
+/* ####### INTERRUPT REGISTERS & MASKS ####### */
+#define INT_STATUS_0_REG            UINT8_C(0x1C)
+#define INT_S_TAP                   UINT8_C(0x10)
+#define INT_D_TAP                   UINT8_C(0x20)
+#define INT_EN_0_REG                UINT8_C(0x50)
+#define S_D_TAP_ENABLE_BYTE         UINT8_C(0xFF)
+#define INT1_OUTPUT_EN              UINT8_C(0x04)
+#define INT_OUT_CTRL_REG            UINT8_C(0x53)
+#define INT_MAP_0_REG               UINT8_C(0x55)
+#define INT_TAP_0_REG               UINT8_C(0x63)
+#define INT_TAP_1_REG               UINT8_C(0x64)
+#define INT_TAP_0_CONF_BYTE         UINT8_C(0x86)
+#define INT_TAP_1_CONF_BYTE         UINT8_C(0x01)
+#define INT_0_DISABLE_BYTE          UINT8_C(0x00)
+#define INT_0_ENABLE_BYTE           UINT8_C(0x04)
+#define LATCH_INT                   UINT8_C(0x1F)
+#define UNLATCH_INT                 UINT8_C(0x10)
+#define INT_LATCH_REG               UINT8_C(0x54)
+
+/* ####### BMI160 REGISTERS & MASKS ####### */
 #define RESET_MASK                  UINT8_C(0xFF)
 #define BMI160_CMD_REG              UINT8_C(0x7E)
 #define PMU_STATUS_REG              UINT8_C(0x03)
 #define ACC_Z_LOW_REG               UINT8_C(0x16)
 #define ACC_Z_HIGH_REG              UINT8_C(0x17)
-#define INTERRUPT_CONF_BYTE         UINT8_C(0x50)
 
 class BMI160
 {
@@ -90,7 +108,13 @@ public:
     BMI160(uint8_t addr);
     ~BMI160();
     void initialize_I2C();
+    void initialize_interrupt_engines();
+    void latch_int_reg();
+    void unlatch_int_reg();
+    void interrupt_detection_index();
+    void interrupt_detection_middle();
     void interrupt_test();
+    void read_int_status_reg(uint8_t *data);
     void read_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void write_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void check_acc_range_conf(uint8_t *data);
@@ -109,6 +133,7 @@ public:
     void get_gyro_data(uint8_t *data, JsonArray& array);
     void get_sensor_data();
     size_t publish_sensor_data(JsonDocument& doc);
+    bool interruptTriggerd = false;
 };
 
 #endif

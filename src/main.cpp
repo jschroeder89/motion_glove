@@ -20,6 +20,8 @@ BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
+bool IndexInterruptTriggerd = false;
+bool MiddleInterruptTriggerd = false;
 // uint8_t txValue = 5;
 // const int ledPin = 33;
 #ifndef LED_BUILTIN
@@ -34,18 +36,36 @@ bool oldDeviceConnected = false;
 #define CHARACTERISTIC_UUID_TX	"6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 #define SDA						21 
 #define SCL						22 
-#define INTERRUPT_PIN			35
-#define I2C_BUS_0				0
-#define I2C_BUS_1 				1
+#define FINGER_TAP_INDEX		27
+#define FINGER_TAP_MIDDLE		0
+#define _MAIN_					0
+#define _PINKY_	 				1
+#define _RING_	 				2
+#define _MIDDLE_	 			3
+#define _INDEX_	 				4	
+#define _THUMB_					5
+#define _FUEL_GAUGE_			6
 #define TCA9548A_I2C_ADDR		UINT8_C(0x72)
 
-//void interrupt_test();
+void index_interrupt_triggerd();
+void middle_interrupt_triggered();
+
 
 TCA9548A I2C_MUX;
-BNO055 HB_UNIT(0x28);
-BMI160 finger_mid(0x68);
+BNO055 MAIN(0x28);
+BMI160 INDEX(0x68);
+BMI160 MIDDLE(0x68);
 //BMI160 finger_end(0x69);
 
+void index_interrupt_triggered() {
+	IndexInterruptTriggerd = true;
+	return;
+}
+
+void middle_interrupt_triggered() {
+	MiddleInterruptTriggerd = true;
+	return;
+}
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -78,20 +98,17 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
 void setup() {
 	delay(3000);
-	
-	delay(3000);
 	Serial.begin(115200);
 	pinMode(LED_BUILTIN, OUTPUT);
 	Wire.begin(SDA, SCL, 400000);
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
-	//HB_UNIT.initialize_I2C(OPR_MODE_IMU);
-	HB_UNIT.initialize_I2C(OPR_MODE_AMG);
-	finger_mid.initialize_I2C();
-	// finger_end.initialize_I2C();
-	//pinMode(35, OUTPUT);
-	//pinMode(25, OUTPUT);
-	
-	// //attachInterrupt(INTERRUPT_PIN, interrupt_test, CHANGE);
+	//MAIN.initialize_I2C(OPR_MODE_IMU);
+	MAIN.initialize_I2C(OPR_MODE_AMG);
+	INDEX.initialize_interrupt_engines();
+	//INDEX.latch_int_reg();
+	INDEX.initialize_I2C();
+	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, RISING);
+	attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
 	// Create the BLE Deqvice
 	//BLEDevice::init("ESP32"); //REENABLE
 	
@@ -128,12 +145,17 @@ void setup() {
 void loop() {
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 	delay(100);
-	I2C_MUX.select_bus(5);
-	finger_mid.get_sensor_data();
+	I2C_MUX.select_bus(_INDEX_);
+	INDEX.get_sensor_data();
 	delay(0.1);
-	I2C_MUX.select_bus(I2C_BUS_0);
+	if (IndexInterruptTriggerd == true) {
+		INDEX.interrupt_detection_index();
+		IndexInterruptTriggerd = false;
+		//INDEX.unlatch_int_reg();
+		//INDEX.latch_int_reg();
+	}
+	//I2C_MUX.select_bus(_INDEX_);
 	//HB_UNIT.get_sensor_data(OPR_MODE_AMG, NONE);
-	HB_UNIT.get_sensor_offset();
 	//HB_UNIT.get_sensor_data(OPR_MODE_IMU, EULE);
 
 	/*if (deviceConnected) {	

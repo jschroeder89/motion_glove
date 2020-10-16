@@ -166,14 +166,81 @@ void BMI160::initialize_I2C()
     return;
 }
 
+void BMI160::latch_int_reg() {
+    uint8_t data[1] = {0};
+    data[0] = LATCH_INT;
+    write_reg(&data[0], INT_LATCH_REG, 1);
+    return;
+}
+
+void BMI160::unlatch_int_reg() {
+    uint8_t data[1] = {0};
+    data[0] = UNLATCH_INT;
+    write_reg(&data[0], INT_LATCH_REG, 1);
+    return;
+}
+void BMI160::initialize_interrupt_engines() 
+{
+    uint8_t data[2] = {0}; 
+    data[0] = INT1_OUTPUT_EN;
+    write_reg(&data[0], INT_OUT_CTRL_REG, 1);
+    data[0] = S_D_TAP_ENABLE_BYTE;
+    data[1] = 0xF0;
+    write_reg(&data[0], INT_MAP_0_REG, 2);
+    data[0] = 0x30;
+    write_reg(&data[0], INT_EN_0_REG, 1);
+    data[0] = INT_TAP_0_CONF_BYTE;
+    data[1] = INT_TAP_1_CONF_BYTE;
+    write_reg(&data[0], INT_TAP_0_REG, 2);
+    data[0] = LATCH_INT;
+    write_reg(&data[0], INT_LATCH_REG, 1);
+    return;
+}
+
+void BMI160::interrupt_detection_index() {
+    uint8_t data[1] = {0};
+    read_reg(&data[0], INT_STATUS_0_REG, 1);
+    Serial.println(data[0], HEX);
+    /* while (data[0] == 0) {
+        read_reg(&data[0], INT_STATUS_0_REG, 1);
+    } */
+    //data[0] = UNLATCH_INT;
+    //write_reg(&data[0], INT_LATCH_REG, 1);
+    DynamicJsonDocument doc(32);
+    if (data[0] == INT_S_TAP) {
+        doc["INDEX"] = "LEFT_CLICK";
+        publish_sensor_data(doc);
+    } else if (data[0] == INT_D_TAP) {
+        doc["INDEX"] = "DOBBLE_CLICK";
+        publish_sensor_data(doc);
+    }
+    return;
+}
+
+void BMI160::interrupt_detection_middle()
+{
+    uint8_t data[1] = {0};
+    read_reg(&data[0], INT_STATUS_0_REG, 1);
+    Serial.println(data[0], HEX);
+    while (data[0] == 0) {
+        read_reg(&data[0], INT_STATUS_0_REG, 1);
+    }
+    data[0] = UNLATCH_INT;
+    write_reg(&data[0], INT_LATCH_REG, 1);
+    DynamicJsonDocument doc(32);
+    if (data[0] == INT_S_TAP) {
+        doc["MIDDLE"] = "RIGHT_CLICK";
+        publish_sensor_data(doc);
+    }
+    return;
+}
+
 void BMI160::write_reg(uint8_t *data, uint8_t addr, uint8_t len)
 {
-    if ((ACC_PWRMODE_NORMAL == true) || (GYRO_PWRMODE_NORMAL == true))
-    {
+    if ((ACC_PWRMODE_NORMAL == true) || (GYRO_PWRMODE_NORMAL == true)) {
         Wire.beginTransmission(SLAVE_ADDR);
         Wire.write(addr);
-        for (int i = 0; i < len; i++)
-        {
+        for (int i = 0; i < len; i++) {
             Wire.write(data[i]);
             //delay(1);
         }
@@ -281,7 +348,6 @@ void BMI160::get_gyro_data(uint8_t *data, JsonArray& array)
 
 size_t BMI160::publish_sensor_data(JsonDocument& doc) 
 {
-    //size_t num_bytes = serializeMsgPack(doc, Serial);
     size_t num_bytes = serializeJson(doc, Serial);
     Serial.println("");
     return num_bytes;
