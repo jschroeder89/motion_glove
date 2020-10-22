@@ -199,7 +199,7 @@ void BMI160::interrupt_detection_index() {
     //Serial.println(data[0], HEX);
     while (data[0] == 0) {
         read_reg(&data[0], INT_STATUS_0_REG, 1);
-        //if (data[0] != 0) Serial.println(data[0], HEX);
+        if (data[0] != 0) Serial.println(data[0], HEX);
     } 
     //data[0] = UNLATCH_INT;
     //write_reg(&data[0], INT_LATCH_REG, 1);

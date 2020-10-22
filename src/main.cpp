@@ -101,18 +101,17 @@ void setup() {
 	Serial.begin(115200);
 	pinMode(LED_BUILTIN, OUTPUT);
 	Wire.begin(SDA, SCL, 400000);
+	INDEX.initialize_I2C();
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
 	//MAIN.initialize_I2C(OPR_MODE_IMU);
 	MAIN.initialize_I2C(OPR_MODE_AMG);
 	INDEX.initialize_interrupt_engines();
-	//INDEX.latch_int_reg();
-	INDEX.initialize_I2C();
 	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, RISING);
 	attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
 	// Create the BLE Deqvice
 	//BLEDevice::init("ESP32"); //REENABLE
-	
-	/*
+
+	/*/
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();
 	pServer->setCallbacks(new MyServerCallbacks());
@@ -147,9 +146,10 @@ void loop() {
 	I2C_MUX.select_bus(_INDEX_);
 	INDEX.get_sensor_data();
 	delay(25);
+	Serial.println(IndexInterruptTriggerd);
 	//delay(0.1);
 	if (IndexInterruptTriggerd == true) {
-		INDEX.interrupt_detection_index();
+		/INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
 		//INDEX.unlatch_int_reg();
 		//INDEX.latch_int_reg();
