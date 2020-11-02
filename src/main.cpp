@@ -106,7 +106,7 @@ void setup() {
 	//MAIN.initialize_I2C(OPR_MODE_IMU);
 	MAIN.initialize_I2C(OPR_MODE_AMG);
 	INDEX.initialize_interrupt_engines();
-	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, RISING);
+	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, HIGH);
 	attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
 	// Create the BLE Deqvice
 	//BLEDevice::init("ESP32"); //REENABLE
@@ -144,12 +144,11 @@ void setup() {
 void loop() {
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 	I2C_MUX.select_bus(_INDEX_);
-	INDEX.get_sensor_data();
-	delay(25);
-	Serial.println(IndexInterruptTriggerd);
+	//INDEX.get_sensor_data();
+	delay(50);
 	//delay(0.1);
 	if (IndexInterruptTriggerd == true) {
-		/INDEX.interrupt_detection_index();
+		INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
 		//INDEX.unlatch_int_reg();
 		//INDEX.latch_int_reg();
