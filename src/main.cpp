@@ -106,7 +106,7 @@ void setup() {
 	//MAIN.initialize_I2C(OPR_MODE_IMU);
 	MAIN.initialize_I2C(OPR_MODE_AMG);
 	INDEX.initialize_interrupt_engines();
-	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, RISING);
+	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, HIGH);
 	attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
 	// Create the BLE Deqvice
 	//BLEDevice::init("ESP32"); //REENABLE

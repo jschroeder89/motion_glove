@@ -198,8 +198,8 @@ void BMI160::interrupt_detection_index() {
     read_reg(&data[0], INT_STATUS_0_REG, 1);
     //Serial.println(data[0], HEX);
     while (data[0] == 0) {
+        if (data[0] == 1) return;
         read_reg(&data[0], INT_STATUS_0_REG, 1);
-        if (data[0] != 0) Serial.println(data[0], HEX);
     } 
     DynamicJsonDocument doc(32);
     if (data[0] == INT_S_TAP) {
