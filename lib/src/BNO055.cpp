@@ -32,6 +32,93 @@ void BNO055::check_power_mode(uint8_t *data)
     return;
 }
 
+uint8_t BNO055::check_acc_calib_status(uint8_t *data) 
+{
+    uint8_t status = (data[0] & ~ACC_CALIB_MASK);
+    return status;
+}
+
+uint8_t BNO055::check_gyr_calib_status(uint8_t *data)
+{
+    uint8_t status = (data[0] & ~GYR_CALIB_MASK);
+    return status;
+}
+
+uint8_t BNO055::check_mag_calib_status(uint8_t *data)
+{
+    uint8_t status = (data[0] & ~MAG_CALIB_MASK);
+    return status;
+}
+
+void BNO055::check_calibration_status() {
+    uint8_t data[1] = {0};
+    uint8_t status = 0, temp = 0;
+    read_reg(data, CALIB_STAT_REG, 1);
+    if (data[0] == SYSTEM_FULLY_CALIBRATED) {
+        Serial.println("System fully calibrated!");
+        return;
+    }    
+    Serial.println("Begin magnetometer calibration!\n");
+    status = check_mag_calib_status(data);
+    while (status != MAG_FULLY_CALIBRATED) {
+        status = check_mag_calib_status(data);
+        switch (status) {
+        case MAG_33_CALIBRATED:
+            Serial.println("MAG: 33 percent calibrated!");
+            break;
+        case MAG_66_CALIBRATED:
+            Serial.println("MAG: 66 percent calibrated!");
+            break;
+        case MAG_FULLY_CALIBRATED:
+            Serial.println("MAG: 100 percent calibrated!");
+            break;
+
+        default:
+            break;
+        }
+    }
+    Serial.println("Begin accelerometer calibration!\n");
+    status = check_acc_calib_status(data);
+    while (status != ACC_FULLY_CALIBRATED) {
+        status = check_acc_calib_status(data);
+        switch (status) {
+        case ACC_33_CALIBRATED:
+            Serial.println("ACC: 33 percent calibrated!");
+            break;
+        case ACC_66_CALIBRATED:
+            Serial.println("ACC: 66 percent calibrated!");
+            break;
+        case ACC_FULLY_CALIBRATED:
+            Serial.println("ACC: 100 percent calibrated!");
+            break;
+
+        default:
+            break;
+        }
+    }
+    Serial.println("Begin gyroscope calibration!\n");
+    status = check_gyr_calib_status(data);
+    while (status != GYR_FULLY_CALIBRATED) {
+        status = check_gyr_calib_status(data);
+        switch (status) {
+        case GYR_33_CALIBRATED:
+            Serial.println("GYR: 33 percent calibrated!");
+            break;
+        case GYR_66_CALIBRATED:
+            Serial.println("GYR: 66 percent calibrated!");
+            break;
+        case GYR_FULLY_CALIBRATED:
+            Serial.println("GYR: 100 percent calibrated!");
+            break;
+
+        default:
+            break;
+        }
+    }    
+    
+    return;
+}
+
 void BNO055::initialize_operating_mode(uint8_t opr_mode)
 {
     write_reg(&opr_mode, OPR_MODE, 1);  

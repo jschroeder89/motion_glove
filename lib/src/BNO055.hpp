@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <Keyboard.h>
 
 #define CHIP_ID                 UINT8_C(0x00) // should be 0xA0
 #define ACC_ID                  UINT8_C(0x01)  // should be 0xFB
@@ -57,7 +58,7 @@
 #define GRV_DATA_Z_LSB          UINT8_C(0x32)
 #define GRV_DATA_Z_MSB          UINT8_C(0x33)
 #define TEMP                    UINT8_C(0x34)
-#define CALIB_STAT              UINT8_C(0x35)
+#define CALIB_STAT_REG          UINT8_C(0x35)
 #define ST_RESULT               UINT8_C(0x36)
 #define INT_STATUS              UINT8_C(0x37)
 #define SYS_CLK_STATUS          UINT8_C(0x38)
@@ -133,6 +134,21 @@
 #define UNIT_SEL_ANG_RATE_RAD   UINT8_C(0x02)
 #define UNIT_SEL_EU_ANG_DEG     UINT8_C(0x00)
 #define UNIT_SEL_EU_ANG_RAD     UINT8_C(0x04)
+#define SYS_CALIB_MASK          UINT8_C(0x3F)
+#define GYR_CALIB_MASK          UINT8_C(0xAF)
+#define ACC_CALIB_MASK          UINT8_C(0xF3)
+#define MAG_CALIB_MASK          UINT8_C(0xFA)
+#define SYSTEM_FULLY_CALIBRATED UINT8_C(0xFF)
+#define MAG_33_CALIBRATED       UINT8_C(0x01)
+#define MAG_66_CALIBRATED       UINT8_C(0x02)
+#define MAG_FULLY_CALIBRATED    UINT8_C(0x03)
+#define ACC_33_CALIBRATED       UINT8_C(0x04)
+#define ACC_66_CALIBRATED       UINT8_C(0x08)
+#define ACC_FULLY_CALIBRATED    UINT8_C(0x0A)
+#define GYR_33_CALIBRATED       UINT8_C(0x10)
+#define GYR_66_CALIBRATED       UINT8_C(0x20)
+#define GYR_FULLY_CALIBRATED    UINT8_C(0x30)
+
 #define EULE                    true   
 #define QUAT                    false
 #define NONE                    false
@@ -159,6 +175,10 @@ public:
     void initialize_I2C(uint8_t opr);
     void initialize_BNO055(uint8_t *data, uint8_t opr);
     void check_power_mode(uint8_t *data);
+    uint8_t check_acc_calib_status(uint8_t *data);
+    uint8_t check_gyr_calib_status(uint8_t *data);
+    uint8_t check_mag_calib_status(uint8_t *data);
+    void check_calibration_status();
     void initialize_operating_mode(uint8_t opr_mode); 
     void select_unit(uint8_t unit);
     void get_sensor_data(uint8_t opr, bool format);
