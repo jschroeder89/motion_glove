@@ -50,6 +50,8 @@ bool MiddleInterruptTriggerd = false;
 void index_interrupt_triggerd();
 void middle_interrupt_triggered();
 
+unsigned long start = 0;
+unsigned long time = 0;
 
 TCA9548A I2C_MUX;
 BNO055 MAIN(0x28);
@@ -97,14 +99,12 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
 
 void setup() {
-	delay(3000);
 	Serial.begin(115200);
 	pinMode(LED_BUILTIN, OUTPUT);
 	Wire.begin(SDA, SCL, 400000);
 	INDEX.initialize_I2C();
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
-	//MAIN.initialize_I2C(OPR_MODE_IMU);
-	MAIN.initialize_I2C(OPR_MODE_AMG);
+	MAIN.initialize_I2C(OPR_MODE_IMU);
 	INDEX.initialize_interrupt_engines();
 	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, HIGH);
 	attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
@@ -142,21 +142,20 @@ void setup() {
 }
 
 void loop() {
+	start = millis();
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 	I2C_MUX.select_bus(_INDEX_);
 	//INDEX.get_sensor_data();
-	delay(25);
-	//delay(0.1);
+	delay(1);
 	if (IndexInterruptTriggerd == true) {
 		INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
-		//INDEX.unlatch_int_reg();
-		//INDEX.latch_int_reg();
 	}
-	//I2C_MUX.select_bus(_INDEX_);
-	//HB_UNIT.get_sensor_data(OPR_MODE_AMG, NONE);
-	//HB_UNIT.get_sensor_data(OPR_MODE_IMU, EULE);
-
+	I2C_MUX.select_bus(_MAIN_);
+	MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
+	time = start - millis();
+	Serial.print("Time: ");
+	Serial.println(time);
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
 		pTxCharacteristic->notify();

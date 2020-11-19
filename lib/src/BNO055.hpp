@@ -125,6 +125,7 @@
 #define OPR_MODE_CONF           UINT8_C(0x00)
 #define OPR_MODE_AMG            UINT8_C(0x07)
 #define OPR_MODE_IMU            UINT8_C(0x08)
+#define OPR_MODE_LIN_ACC        UINT8_C(0x09)
 #define OPR_MODE_M4G            UINT8_C(0x0A)
 #define OPR_MODE_NDOF_FMC_OFF   UINT8_C(0x0B)
 #define OPR_MODE_NDOF           UINT8_C(0x0C)
@@ -158,15 +159,6 @@ class BNO055
 {
 private:
     uint8_t SLAVE_ADDR; //BNO055 is using the I2C address 0x28
-    uint8_t ACC_X_OFFSET;
-    uint8_t ACC_Y_OFFSET;
-    uint8_t ACC_Z_OFFSET;
-    uint8_t GYRO_X_OFFSET;
-    uint8_t GYRO_Y_OFFSET;
-    uint8_t GYRO_Z_OFFSET;
-    uint8_t MAG_X_OFFSET;
-    uint8_t MAG_Y_OFFSET;
-    uint8_t MAG_Z_OFFSET;
     
     
 public:
@@ -182,21 +174,21 @@ public:
     void initialize_operating_mode(uint8_t opr_mode); 
     void select_unit(uint8_t unit);
     void get_sensor_data(uint8_t opr, bool format);
-    void get_sensor_offset();
-    void get_acc_offset(uint8_t *data);
     void data_mode_amg();
+    void data_mode_linear_acceleration();
     void data_mode_fusion_absolute_euler();
     void data_mode_fusion_absolute_quaternion();
     void data_mode_fusion_relative_euler();
     void data_mode_fusion_relative_quaternion();
-    void get_acc_data(uint8_t *data, JsonArray& array);
-    void get_mag_data(uint8_t *data, JsonArray& array);
-    void get_gyro_data(uint8_t *data, JsonArray& array);
-    void get_euler_hrp(uint8_t *data, JsonArray& array);
-    void get_quant(uint8_t *data, JsonArray &array);
-    size_t publish_sensor_data(JsonDocument& doc);
+    void get_acc_data(uint16_t *data, JsonArray& array);
+    void get_mag_data(uint16_t *data, JsonArray& array);
+    void get_gyro_data(uint16_t *data, JsonArray& array);
+    void get_euler_hrp(uint16_t *data, JsonArray& array);
+    void get_acc_lin(uint16_t *data, JsonArray &array);
+    void get_quant(uint16_t *data, JsonArray &array);
     void read_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void write_reg(uint8_t *data, uint8_t addr, uint8_t len);
+    size_t publish_sensor_data(JsonDocument& doc);
 };
 
 #endif

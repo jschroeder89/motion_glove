@@ -5,7 +5,15 @@ import time
 import numpy as np
 
 ser = serial.Serial('/dev/ttyUSB0', 115200)
+x_Pos = 0
+y_Pos = 0
+sampleRate = 0 #TBD
 
+def getPosition(acc_data):
+    x_Pos = x_Pos + acc_data[0] * (0.5 * sampleRate * sampleRate)
+    y_Pos = y_Pos + acc_data[1] * (0.5 * sampleRate * sampleRate)
+    print("x_Pos: ", x_Pos, "y_Pos: ", y_Pos)
+    return acc_data
 
 #encode/decode utf8 .split
 while True:
@@ -13,15 +21,8 @@ while True:
     break
 while True:
     x = ser.readline().decode('utf8').strip()
-    y = ser.readline().decode('utf8').strip()
+    j = json.loads(x)
+    if j[0] == "BNO055_0x28":
+        BNO055_arr = getPosition(np.array(j[1]))
     
-    j1 = json.loads(x)
-    j2 = json.loads(y)   
     
-    """if j1[0] == "BNO055_0x28" and j2[0] == "BMI160":
-        BNO055_arr = np.array(j1[1])
-        BMI160_arr = np.array(j2[1])
-    else:
-        BNO055_arr = np.array(j2[1])
-        BMI160_arr = np.array(j1[1])    
-    """

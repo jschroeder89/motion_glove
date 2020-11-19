@@ -184,11 +184,12 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
         } break;
 
     case OPR_MODE_IMU:
-        if (format == EULE)
-        {
+        if (format == EULE) {
             data_mode_fusion_relative_euler();
         } else if (format == QUAT) {
             data_mode_fusion_relative_quaternion();
+        } else if (format == NONE) {
+
         } break;
     
     case OPR_MODE_M4G:
@@ -222,7 +223,7 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
 
 void BNO055::data_mode_amg()
 {
-    uint8_t data[9] = {0};
+    uint16_t data[9] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BNO055_ARRAY = doc.to<JsonArray>();
     BNO055_ARRAY.add("BNO055_0x28");
@@ -234,119 +235,126 @@ void BNO055::data_mode_amg()
     publish_sensor_data(doc);
 }
 
-void BNO055::get_sensor_offset() {
-    uint8_t data[18] = {0};
-    get_acc_offset(&data[0]);
-    Serial.print("ACC_Z_OFFSET: ");
-    Serial.print(ACC_Z_OFFSET);
-    Serial.println("");
-}    
-
-void BNO055::get_acc_offset(uint8_t *data) {
-    uint8_t lsb;
-    uint8_t msb;
-    uint8_t id = 0;
-    read_reg(&data[0], ACC_OFFSET_X_LSB, 6);
-    lsb = data[id++];
-    msb = data[id++];
-    ACC_X_OFFSET = (((uint16_t)((msb << 8) | lsb)));
-    lsb = data[id++];
-    msb = data[id++];
-    ACC_Y_OFFSET = (((uint16_t)((msb << 8) | lsb)));
-    lsb = data[id++];
-    msb = data[id++];
-    ACC_Z_OFFSET = (((uint16_t)((msb << 8) | lsb)));
-    return;
-}
-
-void BNO055::get_acc_data(uint8_t *data, JsonArray& array)
+void BNO055::get_acc_data(uint16_t *data, JsonArray& array)
 {
-    uint8_t lsb;
-    uint8_t msb;
-    uint8_t id = 0;
+    uint16_t lsb;
+    uint16_t msb;
+    uint16_t id = 0;
     read_reg(&data[0], ACC_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     return;
 }
 
-void BNO055::get_mag_data(uint8_t *data, JsonArray& array)
+void BNO055::get_mag_data(uint16_t *data, JsonArray& array)
 {
-    uint8_t lsb;
-    uint8_t msb;
-    uint8_t id = 0;
+    uint16_t lsb;
+    uint16_t msb;
+    uint16_t id = 0;
     read_reg(&data[0], MAG_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     return;
 }
 
-void BNO055::get_gyro_data(uint8_t *data, JsonArray& array)
+void BNO055::get_gyro_data(uint16_t *data, JsonArray& array)
 {
-    uint8_t lsb;
-    uint8_t msb;
-    uint8_t id = 0;
+    uint16_t lsb;
+    uint16_t msb;
+    uint16_t id = 0;
     read_reg(&data[0], GYR_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     return;
 }
 
-void BNO055::get_euler_hrp(uint8_t *data, JsonArray &array) {
-    uint8_t lsb;
-    uint8_t msb;
-    uint8_t id = 0;
+void BNO055::get_euler_hrp(uint16_t *data, JsonArray &array) {
+    uint16_t lsb;
+    uint16_t msb;
+    uint16_t id = 0;
     read_reg(&data[0], EUL_HEADING_LS, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     return;
 }
 
-void BNO055::get_quant(uint8_t *data, JsonArray &array) {
-    uint8_t lsb;
-    uint8_t msb;
-    uint8_t id = 0;
+void BNO055::get_quant(uint16_t *data, JsonArray &array) 
+{
+    uint16_t lsb;
+    uint16_t msb;
+    uint16_t id = 0;
     read_reg(&data[0], QUA_DATA_W_LSB, 8);
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
     lsb = data[id++];
     msb = data[id++];
-    array.add(((uint16_t)((msb << 8) | lsb)));
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
+    return;
+}
+
+void BNO055::get_acc_lin(uint16_t *data, JsonArray &array) 
+{
+    uint16_t lsb;
+    uint16_t msb;
+    uint16_t id = 0;
+    read_reg(&data[0], LIA_DATA_X_LSB, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
+    lsb = data[id++];
+    msb = data[id++];
+    array.add((uint16_t)lsb) | ((uint16_t)(msb << 8));
+    return;
+}
+
+void BNO055::data_mode_linear_acceleration()
+{
+    uint16_t data[6] = {0};
+    DynamicJsonDocument doc(256);
+    JsonArray BNO055_ARRAY = doc.to<JsonArray>();
+    BNO055_ARRAY.add("BNO055_0x28");
+    JsonArray BNO055_DATA = doc.createNestedArray();
+    select_unit(UNIT_SEL_ACC_M_S2);
+    get_acc_lin(data, BNO055_DATA);
+    publish_sensor_data(doc);
     return;
 }
 
@@ -356,7 +364,7 @@ void BNO055::data_mode_fusion_absolute_euler()
 }
 
 void BNO055::data_mode_fusion_relative_euler() {
-    uint8_t data[6] = {0};
+    uint16_t data[6] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BNO055_ARRAY = doc.to<JsonArray>();
     BNO055_ARRAY.add("BNO055_0x28");
@@ -364,6 +372,7 @@ void BNO055::data_mode_fusion_relative_euler() {
     select_unit(UNIT_SEL_EU_ANG_DEG);
     get_euler_hrp(data, BNO055_DATA);
     publish_sensor_data(doc);
+    return;
 }
 
 void BNO055::data_mode_fusion_absolute_quaternion() {
