@@ -10,8 +10,8 @@ y_Pos = 0
 sampleRate = 0 #TBD
 
 def getPosition(acc_data):
-    x_Pos = x_Pos + acc_data[0] * (0.5 * sampleRate * sampleRate)
-    y_Pos = y_Pos + acc_data[1] * (0.5 * sampleRate * sampleRate)
+    x_Pos = x_Pos + ((acc_data[0]/100) * (0.5 * sampleRate * sampleRate))
+    y_Pos = y_Pos + ((acc_data[1]/100) * (0.5 * sampleRate * sampleRate))
     print("x_Pos: ", x_Pos, "y_Pos: ", y_Pos)
     return acc_data
 
