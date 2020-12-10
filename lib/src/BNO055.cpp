@@ -191,7 +191,11 @@ void BNO055::get_sensor_data(uint8_t opr, bool format)
         } else if (format == NONE) {
 
         } break;
-    
+    case OPR_MODE_LIN_ACC:
+        if (format == NONE) {
+            data_mode_linear_acceleration();
+        } break;
+
     case OPR_MODE_M4G:
         if (format == EULE)
         {
@@ -243,13 +247,13 @@ void BNO055::get_acc_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], ACC_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
@@ -261,13 +265,13 @@ void BNO055::get_mag_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], MAG_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
@@ -279,13 +283,13 @@ void BNO055::get_gyro_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], GYR_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
@@ -296,13 +300,13 @@ void BNO055::get_euler_hrp(uint8_t *data, JsonArray &array) {
     read_reg(&data[0], EUL_HEADING_LS, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
@@ -314,34 +318,34 @@ void BNO055::get_quant(uint8_t *data, JsonArray &array)
     read_reg(&data[0], QUA_DATA_W_LSB, 8);
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
 void BNO055::get_acc_lin(uint8_t *data, JsonArray &array) 
 {
-    uint16_t lsb;
-    uint16_t msb;
-    uint16_t id = 0;
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
     read_reg(&data[0], LIA_DATA_X_LSB, 6);
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    array.add(lsb | (msb << 8));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 

@@ -50,8 +50,8 @@ bool MiddleInterruptTriggerd = false;
 void index_interrupt_triggerd();
 void middle_interrupt_triggered();
 
-unsigned long start = 0;
-unsigned long t = 0;
+unsigned long start, end, elapsed;
+
 
 TCA9548A I2C_MUX;
 BNO055 MAIN(0x28);
@@ -142,20 +142,23 @@ void setup() {
 }
 
 void loop() {
-	start = millis();
+	start = micros();
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 	I2C_MUX.select_bus(_INDEX_);
-	//INDEX.get_sensor_data();
 	delay(1);
+	// INDEX.get_sensor_data();
 	if (IndexInterruptTriggerd == true) {
 		INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
 	}
 	I2C_MUX.select_bus(_MAIN_);
-	MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
-	t = start - millis();
+	MAIN.get_sensor_data(OPR_MODE_IMU, EULE);
+	// MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
+	delay(100);
+	end = micros();
+	elapsed = end - start;
 	Serial.print("Time: ");
-	Serial.println(t);
+	Serial.println(elapsed/1000.00);
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
 		pTxCharacteristic->notify();
