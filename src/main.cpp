@@ -51,7 +51,7 @@ void index_interrupt_triggerd();
 void middle_interrupt_triggered();
 
 unsigned long start = 0;
-unsigned long time = 0;
+unsigned long t = 0;
 
 TCA9548A I2C_MUX;
 BNO055 MAIN(0x28);
@@ -153,9 +153,9 @@ void loop() {
 	}
 	I2C_MUX.select_bus(_MAIN_);
 	MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
-	time = start - millis();
+	t = start - millis();
 	Serial.print("Time: ");
-	Serial.println(time);
+	Serial.println(t);
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
 		pTxCharacteristic->notify();

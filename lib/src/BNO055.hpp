@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <Keyboard.h>
 
 #define CHIP_ID                 UINT8_C(0x00) // should be 0xA0
 #define ACC_ID                  UINT8_C(0x01)  // should be 0xFB
@@ -180,12 +179,12 @@ public:
     void data_mode_fusion_absolute_quaternion();
     void data_mode_fusion_relative_euler();
     void data_mode_fusion_relative_quaternion();
-    void get_acc_data(uint16_t *data, JsonArray& array);
-    void get_mag_data(uint16_t *data, JsonArray& array);
-    void get_gyro_data(uint16_t *data, JsonArray& array);
-    void get_euler_hrp(uint16_t *data, JsonArray& array);
-    void get_acc_lin(uint16_t *data, JsonArray &array);
-    void get_quant(uint16_t *data, JsonArray &array);
+    void get_acc_data(uint8_t *data, JsonArray& array);
+    void get_mag_data(uint8_t *data, JsonArray& array);
+    void get_gyro_data(uint8_t *data, JsonArray& array);
+    void get_euler_hrp(uint8_t *data, JsonArray& array);
+    void get_acc_lin(uint8_t *data, JsonArray &array);
+    void get_quant(uint8_t *data, JsonArray &array);
     void read_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void write_reg(uint8_t *data, uint8_t addr, uint8_t len);
     size_t publish_sensor_data(JsonDocument& doc);
