@@ -14,26 +14,14 @@
 #include <driver/gpio.h>
 #include "sdkconfig.h"
 
-
-// /*BLE*/
-BLEServer *pServer = NULL;
-BLECharacteristic *pTxCharacteristic;
-bool deviceConnected = false;
-bool oldDeviceConnected = false;
 bool IndexInterruptTriggerd = false;
 bool MiddleInterruptTriggerd = false;
-// uint8_t txValue = 5;
-// const int ledPin = 33;
+unsigned long start, end, elapsed;
+
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 18
 #endif
 
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
-
-#define SERVICE_UUID			"6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
-#define CHARACTERISTIC_UUID_RX	"6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX	"6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 #define SDA						21 
 #define SCL						22 
 #define FINGER_TAP_INDEX		27
@@ -50,7 +38,6 @@ bool MiddleInterruptTriggerd = false;
 void index_interrupt_triggerd();
 void middle_interrupt_triggered();
 
-unsigned long start, end, elapsed;
 
 
 TCA9548A I2C_MUX;
@@ -69,114 +56,36 @@ void middle_interrupt_triggered() {
 	return;
 }
 
-class MyServerCallbacks : public BLEServerCallbacks
-{
-	void onConnect(BLEServer *pServer)
-{
- 	deviceConnected = true;
-};
-
-void onDisconnect(BLEServer *pServer)
-{
-	deviceConnected = false;
-}
-};
-
-class MyCallbacks : public BLECharacteristicCallbacks {
-	void onWrite(BLECharacteristic *pCharacteristic) {
-		std::string rxValue = pCharacteristic->getValue();
-		if (rxValue.length() > 0) {
-			Serial.println("*********");
-			Serial.print("Received Value: ");
-			for (int i = 0; i < rxValue.length(); i++)
-				Serial.print(rxValue[i]);
-
-			Serial.println();
-			Serial.println("*********");
-		}
-	}
-};
-
-
 void setup() {
 	Serial.begin(115200);
 	pinMode(LED_BUILTIN, OUTPUT);
 	Wire.begin(SDA, SCL, 400000);
 	INDEX.initialize_I2C();
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
-	MAIN.initialize_I2C(OPR_MODE_IMU);
+	// MAIN.initialize_I2C(OPR_MODE_IMU);
+	MAIN.initialize_I2C(OPR_MODE_AMG);
 	INDEX.initialize_interrupt_engines();
-	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, HIGH);
-	attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
-	// Create the BLE Deqvice
-	//BLEDevice::init("ESP32"); //REENABLE
-
-	/*/
-	// Create the BLE Server
-	pServer = BLEDevice::createServer();
-	pServer->setCallbacks(new MyServerCallbacks());
-
-	// Create the BLE Service
-	BLEService *pService = pServer->createService(SERVICE_UUID);
-
-	// Create a BLE Characteristic
-	pTxCharacteristic = pService->createCharacteristic(
-		CHARACTERISTIC_UUID_TX,
-		BLECharacteristic::PROPERTY_NOTIFY);
-
-	pTxCharacteristic->addDescriptor(new BLE2902());
-
-	BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
-		CHARACTERISTIC_UUID_RX,
-		BLECharacteristic::PROPERTY_WRITE);
-
-	pRxCharacteristic->setCallbacks(new MyCallbacks());
-
-	// Start the service
-	pService->start();
-
-	// Start advertising
-	pServer->getAdvertising()->addServiceUUID(pService->getUUID());
-	pServer->getAdvertising()->start();
-	Serial.println("Waiting a client connection to notify...");*/
+	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, CHANGE);
+	// attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
+	
 }
 
 void loop() {
 	start = micros();
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-	I2C_MUX.select_bus(_INDEX_);
 	delay(1);
+	I2C_MUX.select_bus(_INDEX_);
 	// INDEX.get_sensor_data();
 	if (IndexInterruptTriggerd == true) {
 		INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
 	}
 	I2C_MUX.select_bus(_MAIN_);
-	MAIN.get_sensor_data(OPR_MODE_IMU, EULE);
+	MAIN.get_sensor_data(OPR_MODE_AMG, NONE);
+	// MAIN.get_sensor_data(OPR_MODE_IMU, EULE);
 	// MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
-	delay(100);
+	delay(30);
 	end = micros();
 	elapsed = end - start;
-	Serial.print("Time: ");
-	Serial.println(elapsed/1000.00);
-	/*if (deviceConnected) {	
-		pTxCharacteristic->setValue(&txValue, 1);
-		pTxCharacteristic->notify();
-		//txValue++;
-		delay(10); // bluetooth stack will go into congestion, if too many packets are sent
-		//Serial.println(txValue);
-	}
-
-	// disconnecting
-	if (!deviceConnected && oldDeviceConnected) {
-		delay(500);					 // give the bluetooth stack the chance to get things ready
-		pServer->startAdvertising(); // restart advertising
-		Serial.println("start advertising");
-		oldDeviceConnected = deviceConnected;
-	}
-	// connecting
-	if (deviceConnected && !oldDeviceConnected) {
-		// do stuff here on connecting
-		oldDeviceConnected = deviceConnected;
-	}*/
+	
 }

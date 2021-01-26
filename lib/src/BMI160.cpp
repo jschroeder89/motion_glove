@@ -169,12 +169,6 @@ void BMI160::latch_int_reg() {
     return;
 }
 
-void BMI160::unlatch_int_reg() {
-    uint8_t data[1] = {0};
-    data[0] = UNLATCH_INT;
-    write_reg(&data[0], INT_LATCH_REG, 1);
-    return;
-}
 void BMI160::initialize_interrupt_engines() 
 {
     uint8_t data[2] = {0}; 
@@ -194,19 +188,28 @@ void BMI160::initialize_interrupt_engines()
 }
 
 void BMI160::interrupt_detection_index() {
+    int c = 0;
     uint8_t data[1] = {0};
     read_reg(&data[0], INT_STATUS_0_REG, 1);
-    //Serial.println(data[0], HEX);
     while (data[0] == 0) {
+        c++;
+        // Serial.println(c);
+        if (c > 1000) {
+            break;
+        }
+        
         if (data[0] == 1) return;
         read_reg(&data[0], INT_STATUS_0_REG, 1);
     } 
-    DynamicJsonDocument doc(32);
+    DynamicJsonDocument doc(128);
+    JsonArray BMI160_ARRAY = doc.to<JsonArray>();
+    BMI160_ARRAY.add("INDEX");
+    JsonArray BMI160_DATA = doc.createNestedArray();
     if (data[0] == INT_S_TAP) {
-        doc["INDEX"] = "LEFT_CLICK";
+        BMI160_DATA.add("LEFT_CLICK");
         publish_sensor_data(doc);
-    } else if (data[0] == INT_D_TAP) {
-        doc["INDEX"] = "DOBBLE_CLICK";
+    } else if ((data[0] == INT_D_TAP) || (data[0] == 0x30) ) {
+        BMI160_DATA.add("DOBBLE_CLICK");
         publish_sensor_data(doc);
     }
     return;
@@ -220,7 +223,6 @@ void BMI160::interrupt_detection_middle()
     while (data[0] == 0) {
         read_reg(&data[0], INT_STATUS_0_REG, 1);
     }
-    data[0] = UNLATCH_INT;
     write_reg(&data[0], INT_LATCH_REG, 1);
     DynamicJsonDocument doc(32);
     if (data[0] == INT_S_TAP) {
@@ -307,15 +309,12 @@ void BMI160::get_acc_data(uint8_t *data, JsonArray& array)
     read_reg(&data[0], 0x12, 6);
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
     array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }

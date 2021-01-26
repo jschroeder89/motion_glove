@@ -230,12 +230,12 @@ void BNO055::data_mode_amg()
     uint8_t data[9] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BNO055_ARRAY = doc.to<JsonArray>();
-    BNO055_ARRAY.add("BNO055_0x28");
+    BNO055_ARRAY.add("BNO055");
     JsonArray BNO055_DATA = doc.createNestedArray();
     select_unit(UNIT_SEL_ACC_MG);
     get_acc_data(data, BNO055_DATA);
-    get_mag_data(data, BNO055_DATA);
-    get_gyro_data(data, BNO055_DATA);
+    // get_mag_data(data, BNO055_DATA);
+    // get_gyro_data(data, BNO055_DATA);
     publish_sensor_data(doc);
 }
 
@@ -354,9 +354,9 @@ void BNO055::data_mode_linear_acceleration()
     uint8_t data[6] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BNO055_ARRAY = doc.to<JsonArray>();
-    BNO055_ARRAY.add("BNO055_0x28");
+    BNO055_ARRAY.add("BNO055");
     JsonArray BNO055_DATA = doc.createNestedArray();
-    select_unit(UNIT_SEL_ACC_M_S2);
+    select_unit(UNIT_SEL_ACC_MG);
     get_acc_lin(data, BNO055_DATA);
     publish_sensor_data(doc);
     return;

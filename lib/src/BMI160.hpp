@@ -83,12 +83,11 @@
 #define INT_MAP_0_REG               UINT8_C(0x55)
 #define INT_TAP_0_REG               UINT8_C(0x63)
 #define INT_TAP_1_REG               UINT8_C(0x64)
-#define INT_TAP_0_CONF_BYTE         UINT8_C(0xA2)
-#define INT_TAP_1_CONF_BYTE         UINT8_C(0x0F)
+#define INT_TAP_0_CONF_BYTE         UINT8_C(0x80)
+#define INT_TAP_1_CONF_BYTE         UINT8_C(0x01)
 #define INT_0_DISABLE_BYTE          UINT8_C(0x00)
 #define INT_0_ENABLE_BYTE           UINT8_C(0x04)
 #define LATCH_INT                   UINT8_C(0x1A)
-#define UNLATCH_INT                 UINT8_C(0x10)
 #define INT_LATCH_REG               UINT8_C(0x54)
 
 /* ####### BMI160 REGISTERS & MASKS ####### */
@@ -110,7 +109,6 @@ public:
     void initialize_I2C();
     void initialize_interrupt_engines();
     void latch_int_reg();
-    void unlatch_int_reg();
     void interrupt_detection_index();
     void interrupt_detection_middle();
     void interrupt_test();
