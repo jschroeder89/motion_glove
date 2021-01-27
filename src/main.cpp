@@ -62,10 +62,10 @@ void setup() {
 	Wire.begin(SDA, SCL, 400000);
 	INDEX.initialize_I2C();
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
-	// MAIN.initialize_I2C(OPR_MODE_IMU);
-	MAIN.initialize_I2C(OPR_MODE_AMG);
+	MAIN.initialize_I2C(OPR_MODE_IMU);
+	// MAIN.initialize_I2C(OPR_MODE_AMG);
 	INDEX.initialize_interrupt_engines();
-	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, CHANGE);
+	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, FALLING);
 	// attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
 	
 }
@@ -81,10 +81,11 @@ void loop() {
 		IndexInterruptTriggerd = false;
 	}
 	I2C_MUX.select_bus(_MAIN_);
-	MAIN.get_sensor_data(OPR_MODE_AMG, NONE);
+	// MAIN.get_sensor_data(OPR_MODE_AMG, NONE);
+	MAIN.get_sensor_data(OPR_MODE_IMU, QUAT);
 	// MAIN.get_sensor_data(OPR_MODE_IMU, EULE);
 	// MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
-	delay(30);
+	delay(20);
 	end = micros();
 	elapsed = end - start;
 	

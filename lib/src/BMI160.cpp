@@ -192,11 +192,11 @@ void BMI160::interrupt_detection_index() {
     uint8_t data[1] = {0};
     read_reg(&data[0], INT_STATUS_0_REG, 1);
     while (data[0] == 0) {
-        c++;
+        /* c++;
         // Serial.println(c);
         if (c > 1000) {
             break;
-        }
+        } */
         
         if (data[0] == 1) return;
         read_reg(&data[0], INT_STATUS_0_REG, 1);

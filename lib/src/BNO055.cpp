@@ -234,8 +234,8 @@ void BNO055::data_mode_amg()
     JsonArray BNO055_DATA = doc.createNestedArray();
     select_unit(UNIT_SEL_ACC_MG);
     get_acc_data(data, BNO055_DATA);
-    // get_mag_data(data, BNO055_DATA);
-    // get_gyro_data(data, BNO055_DATA);
+    get_mag_data(data, BNO055_DATA);
+    get_gyro_data(data, BNO055_DATA);
     publish_sensor_data(doc);
 }
 
@@ -383,8 +383,15 @@ void BNO055::data_mode_fusion_absolute_quaternion() {
 
 }
 
-void BNO055::data_mode_fusion_relative_quaternion() { 
-
+void BNO055::data_mode_fusion_relative_quaternion() {
+    uint8_t data[8] = {0};
+    DynamicJsonDocument doc(256);
+    JsonArray BNO055_ARRAY = doc.to<JsonArray>();
+    BNO055_ARRAY.add("BNO055_0x28");
+    JsonArray BNO055_DATA = doc.createNestedArray();
+    get_quant(data, BNO055_DATA);
+    publish_sensor_data(doc);
+    return;
 }
 
 size_t BNO055::publish_sensor_data(JsonDocument& doc)
