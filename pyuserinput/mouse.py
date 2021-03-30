@@ -8,6 +8,7 @@ from pymouse import PyMouse
 import math
 
 
+
 class Mouse(object):
     """
     mouse controlls via bno055 
@@ -18,9 +19,9 @@ class Mouse(object):
     x_pos = int(y_dim/2)
     x_pos_prev = int(y_dim/2)
     y_pos_prev = int(x_dim/2)
-    sensitivity = 15000
-    q_w, q_x, q_y, q_z = 0
-    roll, pitch, yaw = 0
+    q_w, q_x, q_y, q_z = 0, 0, 0, 0
+    roll, pitch, heading = 0, 0, 0
+    heading_offset = 0
     def __init__(self):
         """
         set initial position
@@ -31,44 +32,56 @@ class Mouse(object):
         """ 
         get json string from serial bus, strip junk 
         """
+        data = []
         ser_data = ser.readline().decode('utf8').strip()
         ser_data = ser.readline().decode('utf8').strip()
-        j = json.loads(ser_data)
-        if j[0] == ('INDEX' or 'MIDDLE'):
-            data = j[0]
-        else:
-            data = np.array(j[1])
+        s = ser_data.split("][")
+        index = s[0] + ']'
+        main = '[' + s[1]
+        index_data = json.loads(index)
+        main_data = json.loads(main)
+        data.append(np.array(index_data[1]))
+        data.append(np.array(main_data[1]))
         return data
 
-    def format_data(self, data):
+    def format_data_index(self, data):
+        """
+        format raw accelerator data into +-2g range
+        """
+        self.acc_data = data/16384
+        for i in range(len(data)):
+            if self.acc_data[i] > 3.99994/2:
+                self.acc_data[i] = self.acc_data[i] - 3.99994
+
+    def format_data_main(self, data):
         """
         format raw data
         """
-        self.pos_data = data/2^14
-        self.q_w = self.pos_data[0]
-        self.q_x = self.pos_data[1]
-        self.q_y = self.pos_data[2]
-        self.q_z = self.pos_data[3]
-            
-    
-    def quat_to_deg(self):
-        sinr_cosp = 2 * (self.q_w * self.q_x + self.q_y * self.q_z)
-        cosr_cosp = 1 - 2 * (self.q_x * self.q_x + self.q_y * self.q_y)
-        self.roll = math.atan2(sinr_cosp, cosr_cosp)
+        self.orientation_data = data/16
+        #for i in range(len(self.orientation_data)):
+            #if self.orientation_data[i] > 4000:
+                #self.orientation_data[i] = self.orientation_data[i] - 4095
+        self.heading = self.orientation_data[0]  
+        self.pitch = self.orientation_data[1] 
+        self.roll = self.orientation_data[2] 
+        if self.pitch >= 3916:
+            self.pitch = self.pitch - 4095 
+        if self.roll >= 3916:
+            self.roll = self.roll - 4095
+        if self.heading >= 180:
+            self.heading = (360 - self.heading) * -1
+        self.heading = self.heading - self.heading_offset
+        
+        
+    def get_heading_offset(self, ser):
+        data = self.get_serial_data(ser)
+        self.format_data_main(data)
+        self.heading_offset = self.heading
+        
 
-        sinp = 2 * (self.q_w * self.q_y - self.q_z * self.q_x)
-        if abs(sinp) > 1:
-            self.pitch = math.copysign(math.pi/2, sinp)
-        else:
-            self.pitch = math.asin(sinp)
-
-        siny_cosp = 2 * (self.q_w * self.q_z + self.q_x * self.q_y);
-        cosy_cosp = 1 - 2 * (self.q_y * self.q_y + self.q_z * self.q_z);
-        self.yaw = math.atan2(siny_cosp, cosy_cosp);    
-
-    def get_position(self):
-        self.x_pos = int(self.x_pos + ((self.pos_data[0]) * (0.5 * 0.03 * 0.03) * self.sensitivity))
-        self.y_pos = int(self.y_pos + ((self.pos_data[1]*-1) * (0.5 * 0.03 * 0.03) * self.sensitivity))
+    def get_next_position(self):
+        self.x_pos = self.x_pos + (2.5 * self.pitch)
+        self.y_pos = self.y_pos + (1.5 * self.heading)
 
     def move_mouse(self):
         self.m.move(int(self.y_pos), int(self.x_pos))
@@ -90,22 +103,6 @@ class Mouse(object):
                 self.y_pos = self.x_dim
             self.move_mouse()
 
-        """ if x > 0:
-            for i in range(self.x_pos, self.x_pos_prev):
-                xlist.append(i)
-            xlist.reverse()
-        else:
-            for i in range(self.x_pos_prev, self.x_pos):
-                xlist.append(i)
-        if y > 0:
-            for i in range(self.y_pos, self.y_pos_prev):
-                ylist.append(i)
-            ylist.reverse()
-        else:
-            for i in range(self.y_pos_prev, self.y_pos):
-                ylist.append(i) """
-
-
         self.x_pos_prev = self.x_pos
         self.y_pos_prev = self.y_pos
 
@@ -113,16 +110,19 @@ class Mouse(object):
         """
         main loop setting the mouse coordinates 
         """
-        ser = serial.Serial('/dev/ttyUSB0', 115200)
+        ser = serial.Serial('COM3', 115200) #Windows
+        #ser = serial.Serial('/dev/ttyUSB0', 115200) #Linux
+        # self.get_heading_offset(ser)
         while True:
             data = self.get_serial_data(ser)
-
-            if isinstance(data, np.ndarray):
-                self.format_data(data)
-                self.get_position()
-                #self.move_mouse()
-                self.move_mouse_smooth()
-                #print(self.x_pos, self.y_pos)
-
+            self.format_data_index(data[0])
+            self.format_data_main(data[1])
+            # self.get_next_position()
+            # self.move_mouse_smooth()
+            print(self.heading, self.acc_data)
+            
+                
+                
+                
 mouse = Mouse()
 mouse.main_loop()

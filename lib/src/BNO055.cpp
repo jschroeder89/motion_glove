@@ -371,9 +371,9 @@ void BNO055::data_mode_fusion_relative_euler() {
     uint8_t data[6] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BNO055_ARRAY = doc.to<JsonArray>();
-    BNO055_ARRAY.add("BNO055_0x28");
+    BNO055_ARRAY.add("MAIN");
     JsonArray BNO055_DATA = doc.createNestedArray();
-    select_unit(UNIT_SEL_EU_ANG_DEG);
+    // select_unit(UNIT_SEL_EU_ANG_DEG);
     get_euler_hrp(data, BNO055_DATA);
     publish_sensor_data(doc);
     return;

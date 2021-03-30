@@ -1,7 +1,3 @@
-#include <BLEDevice.h>
-#include <BLEServer.h> 
-#include <BLEUtils.h>
-#include <BLE2902.h>
 #include <Arduino.h>
 #include <Wire.h>
 #include <BMI160.hpp>
@@ -46,6 +42,8 @@ BMI160 INDEX(0x68);
 BMI160 MIDDLE(0x68);
 //BMI160 finger_end(0x69);
 
+
+
 void index_interrupt_triggered() {
 	IndexInterruptTriggerd = true;
 	return;
@@ -62,10 +60,11 @@ void setup() {
 	Wire.begin(SDA, SCL, 400000);
 	INDEX.initialize_I2C();
 	I2C_MUX.set_i2c_addr(TCA9548A_I2C_ADDR);
-	MAIN.initialize_I2C(OPR_MODE_IMU);
+	MAIN.initialize_I2C(OPR_MODE_NDOF);
+	
 	// MAIN.initialize_I2C(OPR_MODE_AMG);
-	INDEX.initialize_interrupt_engines();
-	attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, FALLING);
+	// INDEX.initialize_interrupt_engines();
+	// attachInterrupt(FINGER_TAP_INDEX, index_interrupt_triggered, FALLING);
 	// attachInterrupt(FINGER_TAP_MIDDLE, middle_interrupt_triggered, RISING);
 	
 }
@@ -75,16 +74,13 @@ void loop() {
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 	delay(1);
 	I2C_MUX.select_bus(_INDEX_);
-	// INDEX.get_sensor_data();
+	INDEX.get_sensor_data();
 	if (IndexInterruptTriggerd == true) {
 		INDEX.interrupt_detection_index();
 		IndexInterruptTriggerd = false;
 	}
 	I2C_MUX.select_bus(_MAIN_);
-	// MAIN.get_sensor_data(OPR_MODE_AMG, NONE);
-	MAIN.get_sensor_data(OPR_MODE_IMU, QUAT);
-	// MAIN.get_sensor_data(OPR_MODE_IMU, EULE);
-	// MAIN.get_sensor_data(OPR_MODE_LIN_ACC, NONE);
+	MAIN.get_sensor_data(OPR_MODE_NDOF, EULE);
 	delay(20);
 	end = micros();
 	elapsed = end - start;

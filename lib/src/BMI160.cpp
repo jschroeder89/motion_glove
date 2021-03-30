@@ -192,11 +192,11 @@ void BMI160::interrupt_detection_index() {
     uint8_t data[1] = {0};
     read_reg(&data[0], INT_STATUS_0_REG, 1);
     while (data[0] == 0) {
-        /* c++;
         // Serial.println(c);
+        c++;
         if (c > 1000) {
             break;
-        } */
+        } 
         
         if (data[0] == 1) return;
         read_reg(&data[0], INT_STATUS_0_REG, 1);
@@ -293,13 +293,14 @@ void BMI160::get_sensor_data()
     uint8_t data[6] = {0};
     DynamicJsonDocument doc(256);
     JsonArray BMI160_ARRAY = doc.to<JsonArray>();
-    BMI160_ARRAY.add("BMI160");
+    BMI160_ARRAY.add("INDEX");
     JsonArray BMI160_DATA = doc.createNestedArray();
-    get_gyro_data(data, BMI160_DATA);
+    // get_gyro_data(data, BMI160_DATA);
     get_acc_data(data, BMI160_DATA);
     publish_sensor_data(doc);
     return;
 }
+
 
 void BMI160::get_acc_data(uint8_t *data, JsonArray& array) 
 {
