@@ -344,6 +344,6 @@ void BMI160::get_gyro_data(uint8_t *data, JsonArray& array)
 size_t BMI160::publish_sensor_data(JsonDocument& doc) 
 {
     size_t num_bytes = serializeJson(doc, Serial);
-    Serial.println("");
+    // Serial.println("");
     return num_bytes;
 }

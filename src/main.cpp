@@ -70,19 +70,12 @@ void setup() {
 }
 
 void loop() {
-	start = micros();
 	digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-	delay(1);
 	I2C_MUX.select_bus(_INDEX_);
+	delay(1);
 	INDEX.get_sensor_data();
-	if (IndexInterruptTriggerd == true) {
-		INDEX.interrupt_detection_index();
-		IndexInterruptTriggerd = false;
-	}
 	I2C_MUX.select_bus(_MAIN_);
+	delay(1);
 	MAIN.get_sensor_data(OPR_MODE_NDOF, EULE);
 	delay(20);
-	end = micros();
-	elapsed = end - start;
-	
 }
